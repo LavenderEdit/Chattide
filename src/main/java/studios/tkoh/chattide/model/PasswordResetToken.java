@@ -21,6 +21,10 @@ import lombok.EqualsAndHashCode;
 @Builder
 public class PasswordResetToken extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(nullable = false, length = 10)
     private String token;
 

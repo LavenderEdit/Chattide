@@ -16,6 +16,10 @@ import lombok.EqualsAndHashCode;
 @NoArgsConstructor
 public class Comentario extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String contenido;
 

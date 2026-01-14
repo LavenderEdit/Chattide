@@ -18,6 +18,10 @@ import lombok.EqualsAndHashCode;
 @NoArgsConstructor
 public class Like extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @CreationTimestamp
     @Column(name = "fecha_like", updatable = false)
     private LocalDateTime fechaLike;
