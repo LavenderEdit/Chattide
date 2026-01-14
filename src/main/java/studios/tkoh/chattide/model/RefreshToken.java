@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  *
@@ -14,14 +15,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "refresh_tokens")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RefreshToken {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RefreshToken extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String token; // UUID String largo

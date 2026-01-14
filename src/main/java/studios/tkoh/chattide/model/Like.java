@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  *
@@ -13,12 +14,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "likes")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Like {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Like extends BaseEntity {
 
     @CreationTimestamp
     @Column(name = "fecha_like", updatable = false)

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  *
@@ -13,12 +14,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "usuario_grupo")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class UsuarioGrupo {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class UsuarioGrupo extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

@@ -1,11 +1,9 @@
 package studios.tkoh.chattide.model;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -14,6 +12,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -23,14 +22,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "usuarios")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@AttributeOverride(name = "fechaCreacion", column = @Column(name = "fecha_registro"))
+public class Usuario extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -46,9 +43,6 @@ public class Usuario {
 
     @Column(name = "foto_perfil")
     private String fotoPerfil;
-
-    @Column(name = "fecha_registro")
-    private java.time.LocalDateTime fechaRegistro;
 
     @Builder.Default
     private Boolean activo = true;

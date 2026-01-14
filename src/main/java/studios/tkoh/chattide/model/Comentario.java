@@ -3,8 +3,7 @@ package studios.tkoh.chattide.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  *
@@ -13,19 +12,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comentarios")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Comentario {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Comentario extends BaseEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String contenido;
-
-    @CreationTimestamp
-    @Column(name = "fecha_comentario", updatable = false)
-    private LocalDateTime fechaComentario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
