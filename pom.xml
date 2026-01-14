@@ -12,7 +12,7 @@
     <artifactId>chattide</artifactId>
     <version>0.5</version>
     <name>chattide</name>
-    <description>Social network application made with SpringBoot 4.0.1</description>
+    <description>Social network application made with SpringBoot 4.0.1 and Vaadin 25.0.3</description>
     <url/>
     <licenses>
         <license/>
@@ -29,6 +29,8 @@
     <properties>
         <java.version>21</java.version>
         <vaadin.version>25.0.3</vaadin.version>
+        <org.mapstruct.version>1.6.3</org.mapstruct.version> 
+        <lombok.version>1.18.40</lombok.version>
     </properties>
     <dependencies>
         <dependency>
@@ -83,9 +85,15 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.40</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp-test</artifactId>
@@ -139,7 +147,17 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.40</version>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
