@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -14,7 +16,9 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "likes")
 @Data
+@Builder
 @EqualsAndHashCode(callSuper = false)
+@AllArgsConstructor
 @NoArgsConstructor
 public class Like extends BaseEntity {
 
