@@ -46,6 +46,6 @@ public class ComentarioServiceImpl implements ComentarioService {
     @Override
     @Transactional(readOnly = true)
     public List<ComentarioResponse> obtenerComentariosDePost(Long publicacionId) {
-        return comentarioMapper.toResponseList(comentarioRepository.findByPublicacionIdOrderByFechaCreacionAsc(publicacionId));
+        return comentarioMapper.toResponseList(comentarioRepository.findByPublicacionIdOrderByFechaRegistroAsc(publicacionId));
     }
 }
