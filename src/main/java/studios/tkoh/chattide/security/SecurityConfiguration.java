@@ -10,22 +10,31 @@ import org.springframework.security.web.SecurityFilterChain;
  *
  * @author Studios TKOH!
  */
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/images/**").permitAll()
+                .requestMatchers("/VAADIN/**", "/HEARTBEAT/**", "/UIDL/**", "/resources/**").permitAll()
+                .requestMatchers("/images/**", "/icons/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/VAADIN/**").permitAll() // Crucial for Vaadin
-                .requestMatchers("/login").permitAll()
+                .requestMatchers("/login", "/register").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable()) // Simplificado para que funcione
-                .formLogin(form -> form.loginPage("/login").permitAll());
+                .formLogin(form -> form
+                .loginPage("/login")
+                .permitAll()
+                )
+                .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
+                .permitAll()
+                );
 
         return http.build();
     }
