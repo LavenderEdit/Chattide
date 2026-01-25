@@ -65,14 +65,14 @@ public class PublicacionServiceImpl implements PublicacionService {
     @Override
     @Transactional(readOnly = true)
     public Page<PublicacionResponse> obtenerFeedGrupo(Long grupoId, Pageable pageable) {
-        return publicacionRepository.findByGrupoIdOrderByFechaCreacionDesc(grupoId, pageable)
+        return publicacionRepository.findByGrupoIdOrderByFechaRegistroDesc(grupoId, pageable)
                 .map(publicacionMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PublicacionResponse> obtenerMuroUsuario(Long usuarioId, Pageable pageable) {
-        return publicacionRepository.findByUsuarioIdAndGrupoIsNullOrderByFechaCreacionDesc(usuarioId, pageable)
+        return publicacionRepository.findByUsuarioIdAndGrupoIsNullOrderByFechaRegistroDesc(usuarioId, pageable)
                 .map(publicacionMapper::toResponse);
     }
 
