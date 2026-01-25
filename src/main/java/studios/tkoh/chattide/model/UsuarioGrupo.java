@@ -3,8 +3,6 @@ package studios.tkoh.chattide.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -20,6 +18,7 @@ import lombok.EqualsAndHashCode;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@AttributeOverride(name = "fechaRegistro", column = @Column(name = "fecha_union"))
 public class UsuarioGrupo extends BaseEntity {
 
     @Id
@@ -33,10 +32,6 @@ public class UsuarioGrupo extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grupo_id", nullable = false)
     private Grupo grupo;
-
-    @CreationTimestamp
-    @Column(name = "fecha_union")
-    private LocalDateTime fechaUnion;
 
     private String rol; // ADMIN, MIEMBRO
 }

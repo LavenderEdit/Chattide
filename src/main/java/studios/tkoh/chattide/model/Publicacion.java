@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@AttributeOverride(name = "fechaCreacion", column = @Column(name = "fecha_publicacion"))
+@AttributeOverride(name = "fechaRegistro", column = @Column(name = "fecha_publicacion"))
 public class Publicacion extends BaseEntity {
 
     @Id

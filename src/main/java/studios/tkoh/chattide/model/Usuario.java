@@ -1,6 +1,5 @@
 package studios.tkoh.chattide.model;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +28,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@AttributeOverride(name = "fechaCreacion", column = @Column(name = "fecha_registro"))
 public class Usuario extends BaseEntity {
 
     @Id

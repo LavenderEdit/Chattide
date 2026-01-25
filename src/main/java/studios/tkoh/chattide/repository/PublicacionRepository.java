@@ -13,9 +13,9 @@ import studios.tkoh.chattide.model.Publicacion;
 @Repository
 public interface PublicacionRepository extends JpaRepository<Publicacion, Long> {
 
-    Page<Publicacion> findByGrupoIdOrderByFechaCreacionDesc(Long grupoId, Pageable pageable);
+    Page<Publicacion> findByGrupoIdOrderByFechaRegistroDesc(Long grupoId, Pageable pageable);
 
-    Page<Publicacion> findByUsuarioIdAndGrupoIsNullOrderByFechaCreacionDesc(Long usuarioId, Pageable pageable);
+    Page<Publicacion> findByUsuarioIdAndGrupoIsNullOrderByFechaRegistroDesc(Long usuarioId, Pageable pageable);
 
     // Feed Global: Ver posts de todos los grupos a los que pertenezco (Requiere Query compleja, lo dejare para fase avanzada)
 }

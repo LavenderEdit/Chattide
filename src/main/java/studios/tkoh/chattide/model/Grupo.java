@@ -16,6 +16,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
+@AttributeOverride(name = "fechaRegistro", column = @Column(name = "fecha_creacion"))
 public class Grupo extends BaseEntity {
 
     @Id

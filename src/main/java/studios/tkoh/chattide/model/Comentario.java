@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
+@AttributeOverride(name = "fechaRegistro", column = @Column(name = "fecha_comentario"))
 public class Comentario extends BaseEntity {
 
     @Id

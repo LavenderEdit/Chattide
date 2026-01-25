@@ -13,7 +13,7 @@ import studios.tkoh.chattide.model.Comentario;
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
     // Cargar comentarios de un post
-    List<Comentario> findByPublicacionIdOrderByFechaCreacionAsc(Long publicacionId);
+    List<Comentario> findByPublicacionIdOrderByFechaRegistroAsc(Long publicacionId);
 
     // Contar comentarios (para mostrar "5 comentarios" en la tarjeta del post)
     long countByPublicacionId(Long publicacionId);
