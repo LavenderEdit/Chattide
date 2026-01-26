@@ -1,11 +1,14 @@
 package studios.tkoh.chattide.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  *
@@ -13,44 +16,28 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
+
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 1. Deshabilitar CSRF para permitir peticiones UIDL de Vaadin
-        http.csrf(csrf -> csrf.disable());
-
-        // 2. Configuración de Headers para evitar bloqueos de CSS y Frames
-        http.headers(headers -> headers
+        http
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())
-                // Deshabilitar CSP restrictivo en desarrollo para permitir estilos inyectados por Vaadin
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ws: wss:;"))
-        );
-
-        http.authorizeHttpRequests(auth -> auth
-                // Permitir explícitamente rutas de navegación y API
-                .requestMatchers("/login", "/register", "/api/**", "/h2-console/**").permitAll()
-                // Permitir la raíz y CUALQUIER petición que contenga parámetros de Vaadin (v-r=init, v-r=uidl, etc.)
-                // Esto es vital para evitar el ERR_TOO_MANY_REDIRECTS
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/register", "/api/auth/**", "/h2-console/**").permitAll()
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/**?v-r=**").permitAll()
-                // Permitir archivos estáticos por extensión en cualquier nivel de carpeta
                 .requestMatchers("/**/*.js", "/**/*.css", "/**/*.json", "/**/*.png", "/**/*.jpg", "/**/*.svg").permitAll()
-                // Requerir autenticación para el resto
                 .anyRequest().authenticated()
-        );
-
-        // Configuración de Login
-        http.formLogin(form -> form
-                .loginPage("/login")
-                .permitAll()
-                .defaultSuccessUrl("/", true)
-        );
-
-        http.logout(logout -> logout
-                .logoutSuccessUrl("/login")
-                .permitAll()
-        );
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
