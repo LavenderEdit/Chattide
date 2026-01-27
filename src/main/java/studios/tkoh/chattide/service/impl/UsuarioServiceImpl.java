@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import studios.tkoh.chattide.dto.request.BusquedaRequest;
 import studios.tkoh.chattide.dto.request.UsuarioUpdateRequest;
 import studios.tkoh.chattide.dto.response.UsuarioResponse;
@@ -12,6 +13,7 @@ import studios.tkoh.chattide.exception.ResourceNotFoundException;
 import studios.tkoh.chattide.mapper.UsuarioMapper;
 import studios.tkoh.chattide.model.Usuario;
 import studios.tkoh.chattide.repository.UsuarioRepository;
+import studios.tkoh.chattide.service.GoogleDriveService;
 import studios.tkoh.chattide.service.UsuarioService;
 
 /**
@@ -24,6 +26,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final GoogleDriveService googleDriveService;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,6 +45,22 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioMapper.updateEntityFromRequest(request, usuario);
 
         Usuario actualizado = usuarioRepository.save(usuario);
+        return usuarioMapper.toResponse(actualizado);
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse actualizarAvatar(Long usuarioId, MultipartFile file) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", usuarioId));
+
+        // Upload to Drive and get public URL
+        String driveUrl = googleDriveService.uploadAvatar(usuario, file);
+
+        // Update user entity
+        usuario.setFotoPerfil(driveUrl);
+        Usuario actualizado = usuarioRepository.save(usuario);
+
         return usuarioMapper.toResponse(actualizado);
     }
 
