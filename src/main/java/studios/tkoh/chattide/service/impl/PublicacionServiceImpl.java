@@ -5,13 +5,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import studios.tkoh.chattide.dto.request.PublicacionRequest;
 import studios.tkoh.chattide.dto.response.PublicacionResponse;
 import studios.tkoh.chattide.exception.ChattideException;
 import studios.tkoh.chattide.exception.ResourceNotFoundException;
 import studios.tkoh.chattide.mapper.PublicacionMapper;
 import studios.tkoh.chattide.model.Publicacion;
+import studios.tkoh.chattide.model.Usuario;
 import studios.tkoh.chattide.repository.PublicacionRepository;
+import studios.tkoh.chattide.repository.UsuarioRepository;
+import studios.tkoh.chattide.service.GoogleDriveService;
 import studios.tkoh.chattide.service.PublicacionService;
 
 /**
@@ -23,13 +27,25 @@ import studios.tkoh.chattide.service.PublicacionService;
 public class PublicacionServiceImpl implements PublicacionService {
 
     private final PublicacionRepository publicacionRepository;
+    private final UsuarioRepository usuarioRepository;
     private final PublicacionMapper publicacionMapper;
+    private final GoogleDriveService googleDriveService;
 
     @Override
     @Transactional
-    public PublicacionResponse crearPublicacion(PublicacionRequest request) {
-        // Aquí se valida si el usuario es miembro del grupo antes de publicar
+    public PublicacionResponse crearPublicacion(PublicacionRequest request, MultipartFile image) {
+        Usuario usuario = usuarioRepository.findById(request.usuarioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.usuarioId()));
+
         Publicacion publicacion = publicacionMapper.toEntity(request);
+        publicacion.setUsuario(usuario);
+
+        // Upload image if present
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = googleDriveService.uploadPostImage(usuario, image);
+            publicacion.setImagenUrl(imageUrl);
+        }
+
         return publicacionMapper.toResponse(publicacionRepository.save(publicacion));
     }
 
@@ -51,12 +67,14 @@ public class PublicacionServiceImpl implements PublicacionService {
     public void eliminarPublicacion(Long publicacionId, Long usuarioSolicitanteId) {
         Publicacion publicacion = getOrThrow(publicacionId);
 
-        // Lógica: Puede borrar el dueño O un admin del grupo
         boolean esDueno = publicacion.getUsuario().getId().equals(usuarioSolicitanteId);
-        // boolean esAdminGrupo = ... (Lógica para verificar si usuarioSolicitante es admin del grupo)
-
         if (!esDueno) {
             throw new ChattideException("No tienes permiso para eliminar esta publicación");
+        }
+
+        // Delete image from Drive if it exists
+        if (publicacion.getImagenUrl() != null && publicacion.getImagenUrl().contains("drive.google.com")) {
+            googleDriveService.deleteFile(publicacion.getImagenUrl());
         }
 
         publicacionRepository.delete(publicacion);
