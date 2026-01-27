@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import studios.tkoh.chattide.dto.request.PublicacionRequest;
 import studios.tkoh.chattide.dto.response.PublicacionResponse;
 import studios.tkoh.chattide.service.PublicacionService;
@@ -24,8 +25,8 @@ public class PublicacionController {
     private final PublicacionService publicacionService;
 
     @PostMapping
-    public ResponseEntity<PublicacionResponse> crearPublicacion(@Valid @RequestBody PublicacionRequest request) {
-        return ResponseEntity.ok(publicacionService.crearPublicacion(request));
+    public ResponseEntity<PublicacionResponse> crearPublicacion(@Valid @RequestBody PublicacionRequest request, MultipartFile post) {
+        return ResponseEntity.ok(publicacionService.crearPublicacion(request, post));
     }
 
     @PutMapping("/{id}")
