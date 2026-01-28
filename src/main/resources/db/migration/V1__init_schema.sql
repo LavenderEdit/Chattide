@@ -10,19 +10,20 @@ CREATE TABLE usuarios (
     apellido VARCHAR(100) NOT NULL,
     correo VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    foto_perfil VARCHAR(500),
+    foto_perfil TEXT,
+    activo BOOLEAN DEFAULT TRUE,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    activo BOOLEAN DEFAULT TRUE
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- 2. Tabla de Grupos
 CREATE TABLE grupos (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
     descripcion TEXT,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     creador_id BIGINT NOT NULL,
-    CONSTRAINT fk_grupo_creador FOREIGN KEY (creador_id) REFERENCES usuarios(id)
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (creador_id) REFERENCES usuarios(id)
 );
 
 -- 3. Tabla Intermedia: Membresía Usuario-Grupo
@@ -40,34 +41,33 @@ CREATE TABLE usuario_grupo (
 -- 4. Tabla de Publicaciones (Posts)
 CREATE TABLE publicaciones (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(200),
     contenido TEXT NOT NULL,
-    imagen_url VARCHAR(500),
-    fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    imagen_url TEXT,
     usuario_id BIGINT NOT NULL,
     grupo_id BIGINT,
-    CONSTRAINT fk_publicacion_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    CONSTRAINT fk_publicacion_grupo FOREIGN KEY (grupo_id) REFERENCES grupos(id)
+    fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (grupo_id) REFERENCES grupos(id)
 );
 
 -- 5. Tabla de Comentarios
 CREATE TABLE comentarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     contenido TEXT NOT NULL,
-    fecha_comentario DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario_id BIGINT NOT NULL,
     publicacion_id BIGINT NOT NULL,
-    CONSTRAINT fk_comentario_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    CONSTRAINT fk_comentario_publicacion FOREIGN KEY (publicacion_id) REFERENCES publicaciones(id) ON DELETE CASCADE
+    fecha_comentario DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (publicacion_id) REFERENCES publicaciones(id)
 );
 
 -- 6. Tabla de Likes (Me Gusta)
 CREATE TABLE likes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    fecha_like DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario_id BIGINT NOT NULL,
     publicacion_id BIGINT NOT NULL,
-    CONSTRAINT fk_like_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    CONSTRAINT fk_like_publicacion FOREIGN KEY (publicacion_id) REFERENCES publicaciones(id) ON DELETE CASCADE,
+    fecha_like DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (publicacion_id) REFERENCES publicaciones(id),
     UNIQUE KEY uk_like_user_post (usuario_id, publicacion_id)
 );
