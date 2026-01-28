@@ -1,6 +1,6 @@
 package studios.tkoh.chattide.service;
 
-import studios.tkoh.chattide.dto.request.LikeRequest;
+import studios.tkoh.chattide.model.enums.EntityType;
 
 /**
  *
@@ -8,5 +8,5 @@ import studios.tkoh.chattide.dto.request.LikeRequest;
  */
 public interface LikeService {
 
-    void toggleLike(LikeRequest request, Long usuarioId);
+    void toggleLike(Long entityId, EntityType entityType, Long usuarioId);
 }
