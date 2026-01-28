@@ -55,7 +55,7 @@ public class Usuario extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "foto_perfil")
+    @Column(name = "foto_perfil", columnDefinition = "TEXT")
     private String fotoPerfil;
 
     @Builder.Default
