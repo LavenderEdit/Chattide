@@ -16,9 +16,13 @@ public interface GrupoService {
 
     GrupoResponse crearGrupo(GrupoRequest request);
 
+    GrupoResponse obtenerGrupo(Long grupoId);
+
+    GrupoResponse obtenerDetalleGrupo(Long grupoId);
+
     GrupoResponse editarGrupo(Long grupoId, GrupoRequest request);
 
-    void eliminarGrupo(Long grupoId, Long usuarioSolicitanteId);
+    void eliminarGrupo(Long grupoId);
 
     void unirseGrupo(Long grupoId, Long usuarioId);
 
@@ -29,7 +33,8 @@ public interface GrupoService {
 
     void transferirGrupo(MemberActionRequest request, Long usuarioSolicitanteId);
 
-    GrupoResponse obtenerDetalleGrupo(Long grupoId);
+    // Método auxiliar para el controlador
+    void eliminarMiembro(Long grupoId, Long usuarioId);
 
     Page<GrupoResponse> buscarGrupos(BusquedaRequest request, Pageable pageable);
 
