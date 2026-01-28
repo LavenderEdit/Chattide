@@ -12,7 +12,9 @@ import lombok.EqualsAndHashCode;
  * @author Studios TKOH!
  */
 @Entity
-@Table(name = "likes")
+@Table(name = "likes", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"usuario_id", "publicacion_id"})
+})
 @Data
 @Builder
 @EqualsAndHashCode(callSuper = false)
