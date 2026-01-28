@@ -42,7 +42,7 @@ public class Publicacion extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String contenido;
 
-    @Column(name = "imagen_url")
+    @Column(name = "imagen_url", columnDefinition = "TEXT")
     private String imagenUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
