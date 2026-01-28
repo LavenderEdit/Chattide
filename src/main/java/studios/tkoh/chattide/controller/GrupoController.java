@@ -1,6 +1,7 @@
 package studios.tkoh.chattide.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,8 @@ import studios.tkoh.chattide.dto.request.GrupoRequest;
 import studios.tkoh.chattide.dto.request.MemberActionRequest;
 import studios.tkoh.chattide.dto.response.GrupoResponse;
 import studios.tkoh.chattide.service.GrupoService;
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import studios.tkoh.chattide.security.AccessControlService;
 
 /**
  *
@@ -24,58 +26,85 @@ import java.util.List;
 public class GrupoController {
 
     private final GrupoService grupoService;
+    private final AccessControlService accessControlService;
 
     @PostMapping
-    public ResponseEntity<GrupoResponse> crearGrupo(@Valid @RequestBody GrupoRequest request) {
+    public ResponseEntity<GrupoResponse> crearGrupo(@RequestBody GrupoRequest request) {
+        if (!accessControlService.isSameUser(request.creadorId())) {
+            return ResponseEntity.status(403).build();
+        }
         return ResponseEntity.ok(grupoService.crearGrupo(request));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GrupoResponse> obtenerGrupo(@PathVariable Long id) {
-        return ResponseEntity.ok(grupoService.obtenerDetalleGrupo(id));
+    @GetMapping("/{grupoId}")
+    public ResponseEntity<GrupoResponse> obtenerGrupo(@PathVariable Long grupoId) {
+        return ResponseEntity.ok(grupoService.obtenerGrupo(grupoId));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GrupoResponse> editarGrupo(@PathVariable Long id, @Valid @RequestBody GrupoRequest request) {
-        return ResponseEntity.ok(grupoService.editarGrupo(id, request));
+    @PutMapping("/{grupoId}")
+    @PreAuthorize("@accessControlService.isGroupOwner(#grupoId)")
+    public ResponseEntity<GrupoResponse> editarGrupo(
+            @PathVariable Long grupoId,
+            @RequestBody GrupoRequest request) {
+        return ResponseEntity.ok(grupoService.editarGrupo(grupoId, request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarGrupo(@PathVariable Long id, @RequestParam Long usuarioSolicitanteId) {
-        grupoService.eliminarGrupo(id, usuarioSolicitanteId);
+    @DeleteMapping("/{grupoId}")
+    @PreAuthorize("@accessControlService.isGroupOwner(#grupoId) or hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminarGrupo(@PathVariable Long grupoId) {
+        grupoService.eliminarGrupo(grupoId);
         return ResponseEntity.noContent().build();
     }
 
-    // --- Gestión de Miembros ---
-    @PostMapping("/{id}/unirse")
-    public ResponseEntity<String> unirseGrupo(@PathVariable Long id, @RequestParam Long usuarioId) {
-        grupoService.unirseGrupo(id, usuarioId);
-        return ResponseEntity.ok("Te has unido al grupo exitosamente");
+    @PostMapping("/{grupoId}/unirse")
+    public ResponseEntity<Void> unirseGrupo(
+            @PathVariable Long grupoId,
+            @RequestBody MemberActionRequest request) {
+        if (!accessControlService.isSameUser(request.targetUsuarioId())) {
+            return ResponseEntity.status(403).build();
+        }
+        grupoService.unirseGrupo(grupoId, request.targetUsuarioId());
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/salir")
-    public ResponseEntity<String> salirGrupo(@PathVariable Long id, @RequestParam Long usuarioId) {
-        grupoService.salirGrupo(id, usuarioId);
-        return ResponseEntity.ok("Has salido del grupo");
+    @PostMapping("/{grupoId}/salir")
+    public ResponseEntity<Void> salirGrupo(
+            @PathVariable Long grupoId,
+            @RequestBody MemberActionRequest request) {
+        if (!accessControlService.isSameUser(request.targetUsuarioId())) {
+            return ResponseEntity.status(403).build();
+        }
+        grupoService.salirGrupo(grupoId, request.targetUsuarioId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{grupoId}/miembros")
+    @PreAuthorize("@accessControlService.isGroupAdmin(#grupoId)")
+    public ResponseEntity<Void> eliminarMiembro(
+            @PathVariable Long grupoId,
+            @RequestBody MemberActionRequest request) {
+        grupoService.eliminarMiembro(grupoId, request.targetUsuarioId()); // targetUsuarioId viene en el body
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/transferir")
-    public ResponseEntity<String> transferirGrupo(@Valid @RequestBody MemberActionRequest request, @RequestParam Long solicitanteId) {
-        grupoService.transferirGrupo(request, solicitanteId);
-        return ResponseEntity.ok("Propiedad del grupo transferida");
-    }
-
-    // --- Búsquedas ---
-    @GetMapping("/buscar")
-    public ResponseEntity<Page<GrupoResponse>> buscarGrupos(
-            @RequestParam String query,
-            @PageableDefault(size = 10) Pageable pageable) {
-        BusquedaRequest request = new BusquedaRequest(query, pageable.getPageNumber(), pageable.getPageSize(), null, null);
-        return ResponseEntity.ok(grupoService.buscarGrupos(request, pageable));
+    @PreAuthorize("@accessControlService.isGroupOwner(#request.grupoId())")
+    public ResponseEntity<Void> transferirGrupo(@RequestBody MemberActionRequest request) {
+        // El usuarioId en el request es el target (nuevo dueño), el solicitante es el actual (del token)
+        grupoService.transferirGrupo(request, accessControlService.getCurrentUserId());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/mis-grupos")
-    public ResponseEntity<List<GrupoResponse>> misGrupos(@RequestParam Long usuarioId) {
-        return ResponseEntity.ok(grupoService.misGrupos(usuarioId));
+    public ResponseEntity<List<GrupoResponse>> misGrupos() {
+        Long currentUserId = accessControlService.getCurrentUserId();
+        return ResponseEntity.ok(grupoService.misGrupos(currentUserId));
+    }
+
+    @PostMapping("/buscar")
+    public ResponseEntity<Page<GrupoResponse>> buscarGrupos(
+            @RequestBody BusquedaRequest request,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(grupoService.buscarGrupos(request, pageable));
     }
 }
