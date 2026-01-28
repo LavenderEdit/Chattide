@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import studios.tkoh.chattide.model.Usuario;
 import studios.tkoh.chattide.repository.UsuarioRepository;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -30,11 +30,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByCorreo(correo)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con correo: " + correo));
 
-        // Por ahora asignamos un rol genérico "USER".
-        // TODO: En el futuro, se debe sacar roles de la tabla de UsuarioGrupo.
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = usuario.getRoles().stream()
+                .map(rol -> new SimpleGrantedAuthority(rol.name()))
+                .collect(Collectors.toList());
 
-        return new User(usuario.getCorreo(), usuario.getPassword(),
-                usuario.getActivo(), true, true, true, authorities);
+        return new User(
+                usuario.getCorreo(),
+                usuario.getPassword(),
+                usuario.getActivo(),
+                true,
+                true,
+                true,
+                authorities
+        );
     }
 }
