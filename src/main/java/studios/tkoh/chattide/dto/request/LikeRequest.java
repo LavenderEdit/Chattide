@@ -1,6 +1,7 @@
 package studios.tkoh.chattide.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import studios.tkoh.chattide.model.enums.EntityType;
 
 /**
  *
@@ -10,7 +11,6 @@ public record LikeRequest(
         @NotNull
         Long entityId,
         @NotNull
-        String entityType // "POST" o "COMMENT"
-        ) {
+        EntityType entityType) {
 
 }
