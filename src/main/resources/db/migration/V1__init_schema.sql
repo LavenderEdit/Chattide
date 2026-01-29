@@ -41,6 +41,7 @@ CREATE TABLE usuario_grupo (
 -- 4. Tabla de Publicaciones (Posts)
 CREATE TABLE publicaciones (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(100) NOT NULL,
     contenido TEXT NOT NULL,
     imagen_url TEXT,
     usuario_id BIGINT NOT NULL,
