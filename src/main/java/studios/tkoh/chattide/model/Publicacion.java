@@ -37,6 +37,7 @@ public class Publicacion extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "titulo", nullable = false)
     private String titulo;
 
     @Column(columnDefinition = "TEXT", nullable = false)
