@@ -1,5 +1,6 @@
 package studios.tkoh.chattide.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +30,12 @@ public class PublicacionController {
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PublicacionResponse> crearPublicacion(
             @RequestPart("data") PublicacionRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        // Additional check: Ensure the user creating the post is the one logged in
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
         if (!accessControlService.isSameUser(request.usuarioId())) {
             return ResponseEntity.status(403).build();
         }
-        return ResponseEntity.ok(publicacionService.crearPublicacion(request, file));
+        return ResponseEntity.ok(publicacionService.crearPublicacion(request, files));
     }
 
     @PutMapping("/{id}")
@@ -48,8 +49,6 @@ public class PublicacionController {
     @DeleteMapping("/{id}")
     @PreAuthorize("@accessControlService.canDeletePost(#id)")
     public ResponseEntity<Void> eliminarPublicacion(@PathVariable Long id) {
-        // We pass the current user ID to the service for additional logic if needed, 
-        // but the security check is already handled by PreAuthorize
         publicacionService.eliminarPublicacion(id, accessControlService.getCurrentUserId());
         return ResponseEntity.noContent().build();
     }
