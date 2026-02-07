@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,7 @@ public class Usuario extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // --- Datos de Identidad ---
     @Column(nullable = false, length = 100)
     private String nombre;
 
@@ -55,11 +57,34 @@ public class Usuario extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    // --- Perfil Social ---
+    @Column(length = 500)
+    private String biografia;
+
+    @Column(length = 100)
+    private String ubicacion;
+
+    @Column(length = 150)
+    private String sitioWeb;
+
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
+
+    @Column(length = 20)
+    private String telefono;
+
+    // --- Multimedia ---
     @Column(name = "foto_perfil", columnDefinition = "TEXT")
     private String fotoPerfil;
 
+    @Column(name = "foto_portada", columnDefinition = "TEXT")
+    private String fotoPortada;
+
     @Builder.Default
     private Boolean activo = true;
+
+    @Builder.Default
+    private Boolean verificado = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "usuario_roles", joinColumns = @JoinColumn(name = "usuario_id"))
