@@ -1,5 +1,6 @@
 package studios.tkoh.chattide.service;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +13,7 @@ import studios.tkoh.chattide.dto.response.PublicacionResponse;
  */
 public interface PublicacionService {
 
-    PublicacionResponse crearPublicacion(PublicacionRequest request, MultipartFile image);
+    PublicacionResponse crearPublicacion(PublicacionRequest request, List<MultipartFile> image);
 
     PublicacionResponse editarPublicacion(Long publicacionId, PublicacionRequest request);
 
