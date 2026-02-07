@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  *
@@ -74,27 +75,29 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
 
     @Override
     public String uploadAvatar(Usuario usuario, MultipartFile file) {
-        // 1. Delete old avatar if it exists in Drive
+        // 1. Si ya tiene avatar en Drive, eliminarlo para no acumular basura
         if (usuario.getFotoPerfil() != null && usuario.getFotoPerfil().contains("drive.google.com")) {
             deleteFile(usuario.getFotoPerfil());
         }
 
-        // 2. Generate custom name: Name_LastName_Date_CopyCount
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        // 2. Naming: AVATAR_UserId_Timestamp.ext
         String extension = getFileExtension(file.getOriginalFilename());
-
-        // Simulating copy number for this specific upload
-        String fileName = String.format("%s_%s_%s_v1.%s",
-                usuario.getNombre(), usuario.getApellido(), timestamp, extension);
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = String.format("AVATAR_%d_%s.%s", usuario.getId(), timestamp, extension);
 
         return uploadToFolder(file, fileName, avatarsFolderId);
     }
 
     @Override
     public String uploadPostImage(Usuario usuario, MultipartFile file) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String fileName = String.format("POST_%s_%s.%s",
-                usuario.getNombre(), timestamp, getFileExtension(file.getOriginalFilename()));
+        // Naming: POST_UserId_UUID.ext (UUID asegura unicidad absoluta en subidas múltiples simultáneas)
+        String extension = getFileExtension(file.getOriginalFilename());
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        // Estructura: POST_{userId}_{fecha}_{uuid}
+        String fileName = String.format("POST_%d_%s_%s.%s",
+                usuario.getId(), timestamp, uuid, extension);
 
         return uploadToFolder(file, fileName, postsFolderId);
     }
@@ -141,13 +144,12 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
 
     private String getFileExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
-            return "png";
+            return "jpg"; // Default
         }
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
     private String extractIdFromUrl(String url) {
-        // Basic extractor for Drive URLs
         if (url == null) {
             return null;
         }
