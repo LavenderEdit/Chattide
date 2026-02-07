@@ -9,13 +9,11 @@ import jakarta.validation.constraints.NotNull;
  */
 public record PublicacionRequest(
         String titulo,
-
         @NotBlank(message = "El contenido no puede estar vacío")
         String contenido,
-        String imagenUrl,
         @NotNull(message = "El usuario es obligatorio")
         Long usuarioId,
-        Long grupoId
+        Long grupoId // Futuro: List<String> tags, PrivacyLevel privacy
         ) {
 
 }
