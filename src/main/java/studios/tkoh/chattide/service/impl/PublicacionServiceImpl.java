@@ -1,5 +1,7 @@
 package studios.tkoh.chattide.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +15,9 @@ import studios.tkoh.chattide.exception.ResourceNotFoundException;
 import studios.tkoh.chattide.mapper.PublicacionMapper;
 import studios.tkoh.chattide.model.Publicacion;
 import studios.tkoh.chattide.model.Usuario;
+import studios.tkoh.chattide.model.enums.GroupRole;
 import studios.tkoh.chattide.repository.PublicacionRepository;
+import studios.tkoh.chattide.repository.UsuarioGrupoRepository;
 import studios.tkoh.chattide.repository.UsuarioRepository;
 import studios.tkoh.chattide.service.GoogleDriveService;
 import studios.tkoh.chattide.service.PublicacionService;
@@ -28,23 +32,30 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     private final PublicacionRepository publicacionRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioGrupoRepository usuarioGrupoRepository;
     private final PublicacionMapper publicacionMapper;
     private final GoogleDriveService googleDriveService;
 
     @Override
     @Transactional
-    public PublicacionResponse crearPublicacion(PublicacionRequest request, MultipartFile image) {
+    public PublicacionResponse crearPublicacion(PublicacionRequest request, List<MultipartFile> images) {
         Usuario usuario = usuarioRepository.findById(request.usuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.usuarioId()));
 
         Publicacion publicacion = publicacionMapper.toEntity(request);
         publicacion.setUsuario(usuario);
 
-        // Upload image if present
-        if (image != null && !image.isEmpty()) {
-            String imageUrl = googleDriveService.uploadPostImage(usuario, image);
-            publicacion.setImagenUrl(imageUrl);
+        // Lógica de Multi-Upload
+        List<String> uploadedUrls = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile img : images) {
+                if (!img.isEmpty()) {
+                    String url = googleDriveService.uploadPostImage(usuario, img);
+                    uploadedUrls.add(url);
+                }
+            }
         }
+        publicacion.setImagenesUrls(uploadedUrls);
 
         return publicacionMapper.toResponse(publicacionRepository.save(publicacion));
     }
@@ -59,6 +70,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         }
 
         publicacionMapper.updateEntityFromRequest(request, publicacion);
+        publicacion.setEsEditado(true);
         return publicacionMapper.toResponse(publicacionRepository.save(publicacion));
     }
 
@@ -68,13 +80,22 @@ public class PublicacionServiceImpl implements PublicacionService {
         Publicacion publicacion = getOrThrow(publicacionId);
 
         boolean esDueno = publicacion.getUsuario().getId().equals(usuarioSolicitanteId);
-        if (!esDueno) {
+        boolean esAdminGrupo = false;
+
+        if (publicacion.getGrupo() != null) {
+            esAdminGrupo = usuarioGrupoRepository.findByUsuarioIdAndGrupoId(usuarioSolicitanteId, publicacion.getGrupo().getId())
+                    .map(ug -> GroupRole.ADMIN.name().equals(ug.getRol()) || GroupRole.OWNER.name().equals(ug.getRol()))
+                    .orElse(false);
+        }
+
+        if (!esDueno && !esAdminGrupo) {
             throw new ChattideException("No tienes permiso para eliminar esta publicación");
         }
 
-        // Delete image from Drive if it exists
-        if (publicacion.getImagenUrl() != null && publicacion.getImagenUrl().contains("drive.google.com")) {
-            googleDriveService.deleteFile(publicacion.getImagenUrl());
+        if (publicacion.getImagenesUrls() != null) {
+            for (String url : publicacion.getImagenesUrls()) {
+                googleDriveService.deleteFile(url);
+            }
         }
 
         publicacionRepository.delete(publicacion);
